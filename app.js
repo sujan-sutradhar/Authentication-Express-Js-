@@ -3,7 +3,6 @@ const app= express();
 const path = require('path')
 const userModel = require('./models/user');
 const cookieParser = require('cookie-parser');
-const user = require('./models/user');
 const bcrypt =require('bcrypt')
 const jwt = require('jsonwebtoken')
 app.set("view engine","ejs")
@@ -32,9 +31,24 @@ app.post('/register', async function(req,res){
       res.status(200).send("Congoooo !! You are now register succesfully !")
           })
       })
-    
-// app.get('/login',function(req,res){})
-//         res.render('login')
+     
 // //    console.log(user)
+})
+
+app.get('/login',function(req,res){
+     res.render('login')
+})
+app.post('/login', async function(req,res){
+     let{email,password}=req.body;
+     let user =  await  userModel.findOne({email});
+     if(!user) res.send("Something went wrong");
+     bcrypt.compare(password,user.password,(err,result)=>{
+          if(result) res.status(200).send("Loogeed in")
+          else res.redirect('/login')
+     })
+})
+app.get('/logout',function(req,res){
+      res.cookie("token","")
+      res.redirect("/")
 })
 app.listen(3000)
